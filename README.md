@@ -1,6 +1,6 @@
 # DS502-Bittiger AI program 
 ## Week1: 
-Using Python to realise  
+### Using Python to realise  
   * Linear Regression
   * Logistica Regression
   * Softmax Rgression
@@ -16,6 +16,7 @@ Logistical Regression
 Softmax Regression
 * Accuracy: 0.98
 
+---
 ## Week2:
 
 
