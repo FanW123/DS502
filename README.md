@@ -10,7 +10,11 @@ Linear Regression Example
 2. Intercept: 152.939784623
 3. MSE: 2602.55470632
 
+Logistical Regression
+* Accuracy: 0.95
 
+Softmax Regression
+* Accuracy: 0.98
 
 ## Week2:
 
