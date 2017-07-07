@@ -18,7 +18,7 @@ Softmax Regression
 
 ---
 ## Week2:
-
-
+### Implementation of Multi-Layer Perception(MLP) Neural Networks
+* Accurracy: 0.93
 
  
