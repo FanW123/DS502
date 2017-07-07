@@ -224,10 +224,11 @@ class MLP:
         for i in range(self.n_layers, 0, -1):
             z = np.dot(self.layers[i - 1], self.weights[i - 1])
             self.deltas[i - 1] = np.dot(self.deltas[i], self.weights[i].T) * self.activation_dfunc(z)
-
-        # @TODO update weights, need to add bias
+        #
+        # # @TODO update weights, need to add bias
         for i in range(self.n_layers, -1, -1):
-            self.weights[i] += - self.lr * (np.dot(self.layers[i].T, self.deltas[i]))
+            dw = np.dot(self.layers[i].T, self.deltas[i])
+            self.weights[i] += - self.lr *  (dw + self.reg_lambda * self.weights[i])
 
     def predict(self, X):
         """
