@@ -19,7 +19,7 @@ np.random.seed(0)
 w = np.random.randn(2)
 # w = np.zeros(2)
 
-alpha = 0.001  # 步长(注意取值过大会导致振荡,过小收敛速度变慢)
+alpha = 0.01  # 步长(注意取值过大会导致振荡,过小收敛速度变慢)
 diff = 0.
 error = np.zeros(2)
 count = 0  # 循环次数
@@ -37,14 +37,14 @@ while count < loop_max:
                        - target_data[batch: batch + batch_size]).T, input_data[batch: batch + batch_size, :])
         w = w - alpha * (grad * 1.0 / batch_size)  # 注意步长alpha的取值,过大会导致振荡
 
-    error_list.append(np.sum(grad) ** 2)
+        error_list.append(np.sum(grad) ** 2)
     # 判断是否已收敛
-    if np.linalg.norm(w - error) < epsilon:
-        finish = 1
-        break
-    else:
-        error = w
-print 'loop count = %d' % count, '\tw:[%f, %f]' % (w[0], w[1])
+        if np.linalg.norm(w - error) < epsilon:
+            finish = 1
+            break
+        else:
+            error = w
+        print 'loop count = %d' % count, '\tw:[%f, %f]' % (w[0], w[1])
 
 # check with scipy linear regression
 slope, intercept, r_value, p_value, slope_std_error = stats.linregress(x, target_data)
