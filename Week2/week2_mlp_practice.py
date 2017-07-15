@@ -268,26 +268,6 @@ class MLP:
         acc = np.sum(max_index == y) * 1. / n_samples
         return acc
 
-    # def predict(self, X):
-    #     """
-    #     predicting probability outputs
-    #     :param X: array-like, shape(n_samples, n_features)
-    #     :return: array-like, predicted probabilities
-    #     """
-    #     return self.forward(X)
-    #
-    # def score(self, X, y):
-    #     """
-    #     compute accuracy
-    #     :param X: array-like, shape(n_samples, n_features)
-    #     :param y: ground truth labels array-like, shape(n_samples, 1)
-    #     :return: float, accuracy
-    #     """
-    #     n_samples = X.shape[0]
-    #     preds = np.argmax(self.forward(X), axis=1)
-    #     acc = np.sum(1.0 * (preds == y)) / n_samples
-    #     return acc
-    #
 
 
 def my_mlp():
