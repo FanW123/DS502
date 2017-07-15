@@ -19,7 +19,7 @@ def dsigmoid(x):
     :return: derivative value (array like)
     """
     #TODO dsigmoid function
-    return sigmoid(x) * (1-sigmoid(x))
+    return x * (1.0 - x)
 
 def tanh(x):
     """
@@ -48,13 +48,13 @@ def softmax(X):
     :return:
     """
     #TODO softmax function
-    return (np.exp(X).T / np.sum(np.exp(X), axis=1)).T
-
+    #return (np.exp(X).T / np.sum(np.exp(X), axis=1)).T
+    return np.exp(X) / np.sum(np.exp(X), axis=1, keepdims=True)
 
 class MLP:
     #def __init__(self, input_size, output_size, hidden_layer_size=[128], batch_size=200, activation="sigmoid", output_layer='softmax', loss='cross_entropy', lr=0.01, reg_lambda=0.0001, momentum=0.9, verbose=10):
     def __init__(self, input_size, output_size, hidden_layer_size=[100], batch_size=200, activation="sigmoid",
-                 output_layer='softmax', loss='cross_entropy', lr=0.001, reg_lambda=0.0001, momentum=0.9, verbose=1):
+                 output_layer='softmax', loss='cross_entropy', lr=0.001, reg_lambda=0.0001, momentum=0.9, verbose=10):
         """
         Multilayer perceptron Class
         :param input_size: int, input size (n_feature)
@@ -162,15 +162,16 @@ class MLP:
             # shuffle data
             #TODO shuffle data
             if(shuffle_data):
-                shuffled_index = np.random.permutation(X.shape[0])
-                X = X[shuffled_index, :]
-                y = y[shuffled_index]
+                # shuffled_index = np.random.permutation(X.shape[0])
+                # X = X[shuffled_index, :]
+                # y = y[shuffled_index]
+                X, y = shuffle(X, y)
 
             # iterate every batch
             for batch in xrange(0, n_samples, self.batch_size):
                 #TODO call forward function
-                self.forward(X[batch : batch + self.batch_size, :])
-                self.backward(X[batch : batch + self.batch_size, :], y[batch : batch + self.batch_size])
+                self.forward(X[batch : batch + self.batch_size])
+                self.backward(X[batch : batch + self.batch_size], y[batch : batch + self.batch_size])
 
             if i % self.verbose == 0:
                 # Compute Loss and Training Accuracy
@@ -180,6 +181,7 @@ class MLP:
 
         return self
 
+
     def compute_loss(self, X, y):
         """
         Compute loss
@@ -187,23 +189,31 @@ class MLP:
         :param y: label, array-like, shape(n_sample, 1)
         :return: loss value
         """
+        # n_samples = X.shape[0]
+        # probs = self.forward(X)
+        #
+        # # TODO Calculating the loss
+        # data_loss = np.sum(np.dot(-y, np.log(probs)) - np.dot((1 - y), np.log(1 - probs)))
+        #
+        # # TODO Add regularization term to loss
+        # for i in range(0, self.n_layers + 1):
+        #     data_loss += 0.5 * self.reg_lambda * np.sum(np.power(self.weights[i], 2))
+        # return 1. / n_samples * data_loss
+
         n_samples = X.shape[0]
         probs = self.forward(X)
-
-        # TODO Calculating the loss
-        data_loss = np.sum(np.dot(-y, np.log(probs)) - np.dot((1 - y), np.log(1 - probs)))
-
-        # TODO Add regularization term to loss
-        for i in range(0, self.n_layers + 1):
-            data_loss += 0.5 * self.reg_lambda * np.sum(np.power(self.weights[i], 2))
+        # Calculating the loss
+        logprobs = -np.log(probs[range(n_samples), y])
+        data_loss = np.sum(logprobs)
+        # Add regularization term to loss
+        data_loss += self.reg_lambda / 2 * np.sum(np.array([np.dot(w.ravel(), w.ravel()) for w in self.weights]))
         return 1. / n_samples * data_loss
-
 
     def forward(self, X):
         # input layer
         self.layers[0] = X
 
-        # TODO hidden layers
+        # # TODO hidden layers
         for i in range(1, self.n_layers + 1):
             hidden_inputs = np.dot(self.layers[i-1], self.weights[i-1]) + self.bias[i-1]
             self.layers[i] = self.activation_func(hidden_inputs)
@@ -214,6 +224,7 @@ class MLP:
 
         return self.layers[-1]
 
+
     def backward(self, X, y):
         if self.loss == 'cross_entropy':
             self.deltas[-1] = self.layers[-1]
@@ -221,14 +232,17 @@ class MLP:
             self.deltas[-1][range(X.shape[0]), y] -= 1
 
         # @TODO update deltas
-        for i in range(self.n_layers, 0, -1):
-            z = np.dot(self.layers[i - 1], self.weights[i - 1])
-            self.deltas[i - 1] = np.dot(self.deltas[i], self.weights[i].T) * self.activation_dfunc(z)
+        for i in range(len(self.layers) - 3, -1, -1):
+            #self.deltas[i] = np.dot(self.deltas[i + 1], self.weights[i + 1].T) * self.activation_dfunc(self.layers[i+1])
+            self.deltas[i] = np.dot(self.deltas[i + 1], self.weights[i + 1].T) * self.activation_dfunc(self.layers[i + 1])
         #
         # # @TODO update weights, need to add bias
         for i in range(self.n_layers, -1, -1):
             dw = np.dot(self.layers[i].T, self.deltas[i])
-            self.weights[i] += - self.lr *  (dw + self.reg_lambda * self.weights[i])
+            self.weights[i] += - self.lr/self.batch_size * (dw + self.reg_lambda * self.weights[i])
+            #self.weights[i] += -self.lr / self.batch_size * (np.dot(self.layers[i].T, self.deltas[i]) + self.reg_lambda * self.weights[i])
+            self.bias[i] += -self.lr * np.mean(self.deltas[i], axis=0)
+
 
     def predict(self, X):
         """
@@ -254,6 +268,26 @@ class MLP:
         acc = np.sum(max_index == y) * 1. / n_samples
         return acc
 
+    # def predict(self, X):
+    #     """
+    #     predicting probability outputs
+    #     :param X: array-like, shape(n_samples, n_features)
+    #     :return: array-like, predicted probabilities
+    #     """
+    #     return self.forward(X)
+    #
+    # def score(self, X, y):
+    #     """
+    #     compute accuracy
+    #     :param X: array-like, shape(n_samples, n_features)
+    #     :param y: ground truth labels array-like, shape(n_samples, 1)
+    #     :return: float, accuracy
+    #     """
+    #     n_samples = X.shape[0]
+    #     preds = np.argmax(self.forward(X), axis=1)
+    #     acc = np.sum(1.0 * (preds == y)) / n_samples
+    #     return acc
+    #
 
 
 def my_mlp():
@@ -271,7 +305,7 @@ def my_mlp():
     y_test = dataset.target[1500:]
 
     network = MLP(input_size=64, output_size=10, hidden_layer_size=[128], batch_size=200, activation="sigmoid",
-                  output_layer='softmax', loss='cross_entropy', lr=0.001)
+                  output_layer='softmax', loss='cross_entropy', lr=0.1)
 
     network.fit(X_train, y_train, 100, True)
 
