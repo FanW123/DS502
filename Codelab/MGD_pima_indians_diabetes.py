@@ -6,8 +6,9 @@ from sklearn.model_selection import train_test_split
 import sklearn.linear_model as linear_model
 import sklearn
 import sklearn.metrics as metrics
-
-
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import Normalizer
+from sklearn.utils import shuffle
 
 print('\nRescale using sklearn')
 filename = 'pima-indians-diabetes.data.csv'
@@ -20,8 +21,14 @@ array = data_frame.values
 X = array[:, 0:8]
 y = array[:, 8]
 
-scaler = MinMaxScaler(feature_range=(0, 1))
-X = scaler.fit_transform(X)
+scaler = StandardScaler().fit(X)
+X = scaler.transform(X)
+
+#scaler = MinMaxScaler(feature_range=(0, 1))
+#X = scaler.fit_transform(X)
+
+#scaler = Normalizer(norm='l1').fit(X)
+#X = scaler.transform(X)
 
 # Summarize transformed data
 set_printoptions(precision=3)
@@ -38,6 +45,7 @@ epsilon = 1e-3
 
 np.random.seed(0)
 w = np.random.randn(9)
+
 # w = np.zeros(2)
 
 alpha = 0.001
