@@ -1,1 +1,5 @@
-Mini Batch Gradient Descent with Momentum  
+## Implement Mini Batch Gradient Descent with Momentum and apply it to a set of data
+
+Minibatch Gradient Descent Accuracy: 0.65367965368
+
+Minibatch Gradient Descent with Momentum Accuracy: 0.679653679654
