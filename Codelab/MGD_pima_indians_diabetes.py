@@ -6,33 +6,6 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, Normalizer
 from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
 
-def plot_line(x, y, theta=None, regressor=None):
-    # Plot outputs
-    x_min, x_max = x[:, 0].min() - .5, x[:, 0].max() + .5
-    y_min, y_max = x[:, 1].min() - .5, x[:, 1].max() + .5
-    xx, yy = np.meshgrid(np.arange(x_min, x_max, .02), np.arange(y_min, y_max, .02))
-
-    if regressor:
-        Z = regressor.predict(np.c_[xx.ravel(), yy.ravel()])
-    else:
-        Z = pred_val(theta, np.c_[xx.ravel(), yy.ravel()])
-    # Put the result into a color plot
-    Z = Z.reshape(xx.shape)
-    plt.figure(1)
-    plt.pcolormesh(xx, yy, Z, cmap=plt.cm.Paired)
-
-    # Plot also the training points
-    plt.scatter(x[:, 0], x[:, 1], c=y, edgecolors='k', cmap=plt.cm.Paired)
-    plt.xlabel('Sepal Length')
-    plt.ylabel('Sepal Width')
-
-    plt.xlim(xx.min(), xx.max())
-    plt.ylim(yy.min(), yy.max())
-    plt.xticks(())
-    plt.yticks(())
-
-    plt.show()
-
 def sigmoid(x):
     """
     Sigmoid (logistic) function
@@ -81,6 +54,10 @@ def split_data(X, y):
     #x_test, x_val, y_test, y_val = train_test_split(x_test, y_test, test_size=0.5, random_state=42)
     return x_train, y_train, x_test, y_test
 
+# def split_data(X, y):
+#     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0., random_state=42)
+#     return X_train, X_test, y_train, y_test
+
 
 def get_minibatch(X, y, minibatch_size):
     minibatches = []
@@ -103,7 +80,7 @@ def logistic_grad_func(theta, x, y):
     # TODO compute gradient
     y_hat = logistic_val_func(theta, x)
     x = np.c_[np.ones(x.shape[0]), x]
-    grad = np.dot((y - y_hat).T, x)
+    grad = np.dot((y_hat - y).T, x)
     return grad
 
 
@@ -111,8 +88,6 @@ def logistic_cost_func(theta, x, y):
     # compute cost (loss)
     y_hat = logistic_val_func(theta, x)
     cost = np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
-
-    #cost = - (1.0 / x.shape[0]) * np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
     cost *= -1.0 / x.shape[0]
     return cost
 
@@ -142,7 +117,6 @@ def mini_batch_grad_desc(x_train, y_train, theta, max_epoch, lr, batch_size, eps
 
         #calculate cost with updated theta after each batch
         cost = logistic_cost_func(theta, x_mini, y_mini)
-        #print("cost = ", cost)
         cost_iter.append([itr, cost])
         cost_change = abs(cost - pre_cost)
         itr+=1
@@ -169,7 +143,7 @@ if __name__ == '__main__':
     #print('\nRescale using sklearn')
     filename = 'pima-indians-diabetes.data.csv'
     names = ['preg', 'plas', 'pres', 'skin', 'test', 'mass', 'pedi', 'age', 'class']
-    X, y = load_data(filename, names, "min_max")
+    X, y = load_data(filename, names, "l2")
     x_train, y_train, x_test, y_test = split_data(X, y)
 
     max_epoch = 1000
@@ -180,7 +154,7 @@ if __name__ == '__main__':
     theta_1 = np.random.randn(1, x_train.shape[1] + 1)
     theta_2 = np.random.randn(1, x_train.shape[1] + 1)
 
-    lr = 0.00001
+    lr = 0.001
     cost_iter = []
     batch_size = 10
 
