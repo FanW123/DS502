@@ -54,7 +54,19 @@ def conv_layer(if_pool=False):
     # Do you need pooling?
     # What is the expected output shape?
 
-    pass
+    w_c = mx.sym.Variable('w_c')
+    
+    layer = mx.sym.Convolution(data=input_layer, weight=w_c, number_filter=32, layer_depth=1, kernel=kernel,
+                               stride=stride, pad=pad, no_bias=True)
+    if BN:
+        layer = mx.sym.BatchNorm(data=layer, fix_gamma=True, eps=2e-5)
+    if act:
+        layer = mx.sym.Activation(data=layer, act_type='relu')
+    if if_pool:
+        layer = mx.sym.Pooling(data =layer, stride=stride, kernel=kernel,pool_type=max)
+
+    return layer
+
 
 
 # Optional
