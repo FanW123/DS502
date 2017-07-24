@@ -44,7 +44,7 @@ def get_mlp_sym():
     return mlp
 
 
-def conv_layer(if_pool=False):
+def conv_layer(input_layer, number_filter = 64, kernel=(3,3), stride=(1,1), pad=(1,1), if_pool=False, BN=False, act=False):
     """
     :return: a single convolution layer symbol
     """
@@ -54,19 +54,18 @@ def conv_layer(if_pool=False):
     # Do you need pooling?
     # What is the expected output shape?
 
-    w_c = mx.sym.Variable('w_c')
-    
-    layer = mx.sym.Convolution(data=input_layer, weight=w_c, number_filter=32, layer_depth=1, kernel=kernel,
+    layer = mx.sym.Convolution(data=input_layer, num_filter=number_filter, kernel=kernel,
                                stride=stride, pad=pad, no_bias=True)
     if BN:
-        layer = mx.sym.BatchNorm(data=layer, fix_gamma=True, eps=2e-5)
+        layer = mx.sym.BatchNorm(layer)
+
     if act:
         layer = mx.sym.Activation(data=layer, act_type='relu')
+
     if if_pool:
-        layer = mx.sym.Pooling(data =layer, stride=stride, kernel=kernel,pool_type=max)
+        layer = mx.sym.Pooling(data =layer, stride=stride, kernel=kernel, pool_type='max')
 
     return layer
-
 
 
 # Optional
@@ -80,7 +79,8 @@ def inception_layer():
 
 def get_conv_sym():
 
-    """
+    data = mx.sym.Variable("data")
+    """ 
     :return: symbol of a convolutional neural network
     """
     data = mx.sym.Variable("data")
@@ -88,4 +88,18 @@ def get_conv_sym():
     # How deep the network do you want? like 4 or 5
     # How wide the network do you want? like 32/64/128 kernels per layer
     # How is the convolution like? Normal CNN? Inception Module? VGG like?
-    pass
+
+    layer1 = conv_layer(input_layer=data, number_filter=64, if_pool=True, BN=True, act=True)
+    layer2 = conv_layer(input_layer=layer1, number_filter=128, if_pool=True, BN=True, act=True)
+    layer3 = conv_layer(input_layer=layer2, number_filter=256, if_pool=True, BN=True, act=True)
+
+    data_f = mx.sym.flatten(data=layer3)
+
+    # Your Design
+    l = mlp_layer(input_layer=data_f, n_hidden=100, activation="relu", BN=True)
+
+    # MNIST has 10 classes
+    l = mx.sym.FullyConnected(data=l, num_hidden=10)
+    # Softmax with cross entropy loss
+    cnn = mx.sym.SoftmaxOutput(data=l, name='softmax')
+    return cnn
