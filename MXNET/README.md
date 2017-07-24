@@ -40,9 +40,9 @@ Design/train a MLP in mxnet
      
 	|Comparison              | MLP | Your Network
 	
-	|Acc(5 epoch)            |
+	|Acc(5 epoch)            | 0.9731| 0.9982
 
-	|CPU Epoch time          |
+	|CPU Epoch time          | 2.152 | 519
 	
 	|GPU Epoch Time(optional)|
     
