@@ -37,13 +37,11 @@ Design/train a MLP in mxnet
 3) Compare the accuracy and the training time between MLP and CNN
     
     Fill the table of the comparison of two methods
-     
-	|Comparison              | MLP | Your Network
-	
-	|Acc(5 epoch)            | 0.9731| 0.9982
-
-	|CPU Epoch time          | 2.152 | 519
-	
-	|GPU Epoch Time(optional)|
+    
+    |  Comparison | MLP | My CNN |
+    | ----------  | --- | --- |
+    | Acc(5 epoch)| 0.9731| 0.9982
+    | CPU Epoch time | 2.152 | 519
+    |GPU Epoch Time(optional)|
     
   
